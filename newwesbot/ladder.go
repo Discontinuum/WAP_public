@@ -30,6 +30,7 @@ type Ladder interface {
 	Recalculate (pl string) 
 	GetGamesUnfinished () []Game
 	GetGamesUnfinishedOld (at time.Time) []Game
+	IsQualified (pl string) bool
 }
 /*
 */
@@ -37,6 +38,7 @@ type GenericLadder struct {
 	db *pg.DB
 	Admins []string
 	p LadderParameters
+	strictMode bool
 }
 
 var (
@@ -71,11 +73,12 @@ func EloRating (rats []int, winner int) []int {
 	return adjs
 }
 
-func NewGenericLadder(db_ *pg.DB, admins []string, pp LadderParameters) Ladder{
+func NewGenericLadder(db_ *pg.DB, admins []string, pp LadderParameters, strictMode bool) Ladder{
 	return GenericLadder {
 		db: db_,
 		Admins: admins,
 		p: pp,
+		strictMode: strictMode,
 	}
 }
 
@@ -375,3 +378,23 @@ func (l GenericLadder) IsAdmin (pl string) bool{
 	return false
 }
 
+func (l GenericLadder) IsQualified (pl string) bool {
+	if !l.strictMode {
+		return true
+	}
+	var unreportedGames []Game
+	err := l.db.Model (&unreportedGames).Where("? = Any(Players)", strings.ToLower(pl)).Where("Canceled = ?", false).Where("Team_Won = ?", 0).Order ("id ASC").Select()
+	if err != nil {
+		panic(err)
+	}
+	counter := 0
+	for _, g := range unreportedGames {
+		if g.ContestedBy == "" {
+			counter += 1
+		}
+		if counter >= 5 {
+			return false
+		}
+	}
+	return true
+}

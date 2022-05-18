@@ -59,7 +59,7 @@ func main () {
 		wesnoth.PrefetchedMode = true
 	}
 	
-	lad := newwesbot.NewGenericLadder (db, config.Admins, IsarParams{})
+	lad := newwesbot.NewGenericLadder (db, config.Admins, IsarParams{}, true)
 	bot := newwesbot.NewBot (lad)
 	newwesbot.AddDefaultsToBot (bot)
 	
@@ -100,7 +100,7 @@ func main () {
 		//fmt.Println("Isar hosted")
 		time.Sleep(time.Second * 1)
 		s.HostGameFromTemplate(sc, g, fmt.Sprintf ("%s #%d!", config.GameTitle, lad.NextGameId()), "")
-		_ = bot.GameListen (s, config.GreetMessage, config.ExtraMessage, nil, era, units) 
+		_ = bot.GameListen (s, config.GreetMessage, config.ExtraMessage, config.UnqualifiedMessage, nil, era, units) 
 		time.Sleep (time.Millisecond * 500)
 		if s.ForceFinish {
 			break

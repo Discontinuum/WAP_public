@@ -89,7 +89,7 @@ func main () {
 		}
 	}
 	
-	lad := newwesbot.NewGenericLadder (db, config.Admins, AfterParams{})
+	lad := newwesbot.NewGenericLadder (db, config.Admins, AfterParams{}, false)
 	bot := newwesbot.NewBotFactionsFix (lad, factionsFixator)
 	newwesbot.AddDefaultsToBot (bot)
 	
@@ -134,7 +134,7 @@ func main () {
 		}
 		g.ExtraVariables = extras
 		s.HostGameFromTemplate(sc, g, fmt.Sprintf ("%s #%d!", config.GameTitle, lad.NextGameId()), "")
-		_ = bot.GameListen (s, config.GreetMessage, config.ExtraMessage, nil, era, units) 
+		_ = bot.GameListen (s, config.GreetMessage, config.ExtraMessage, config.UnqualifiedMessage, nil, era, units) 
 		time.Sleep (time.Millisecond * 500)
 		if s.ForceFinish {
 			break

@@ -68,7 +68,7 @@ func (b *Bot) AddCommand (c BotCommand) {
 	}
 }
 
-func (b *Bot) GameListen (s *server.Server, greetMsg, extraMsg string, shuffler server.Shuffler, era e.Era,units map[string]*wml.Data) error {
+func (b *Bot) GameListen (s *server.Server, greetMsg, extraMsg, unqualifMsg string, shuffler server.Shuffler, era e.Era,units map[string]*wml.Data) error {
 	defer runtime.GC()
 	for true{
 	data, err := s.GetServerInput(1024)//we don't need more than 1KB answers to parse
@@ -85,7 +85,7 @@ func (b *Bot) GameListen (s *server.Server, greetMsg, extraMsg string, shuffler 
 				fmt.Println (val.Side, val.Player)
 			}
 			// if not blacklisted
-			if s.Sides.HasSide(side) && !s.Sides.HasPlayer(name) && !b.lad.GetPlayer (name).Banned{
+			if s.Sides.HasSide(side) && !s.Sides.HasPlayer(name) && !b.lad.GetPlayer (name).Banned && b.lad.IsQualified (name) {
 				s.SetSidePlayer (side, name, true)
 				s.Message (greetMsg) //"Welcome to the Isar Foundation, a place for rated Isar and fun! I'll start the game immediately when all slots are filled")
 				time.Sleep (time.Millisecond * 300)
@@ -118,6 +118,9 @@ func (b *Bot) GameListen (s *server.Server, greetMsg, extraMsg string, shuffler 
 				s.Observers = append(s.Observers, name)
 				if b.lad.GetPlayer (name).Banned {
 					s.Whisper (name, fmt.Sprintf ("Sorry, %s, you are banned, contact the admins for details", name))
+				} else {
+					s.Whisper (name, unqualifMsg)
+					s.Message (fmt.Sprintf("%s, %s", name, unqualifMsg))
 				}
 			}
 		case data.ContainsTag("side_drop"):

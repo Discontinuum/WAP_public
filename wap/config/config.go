@@ -43,6 +43,7 @@ type Config struct {
 	GameTitle string
 	GreetMessage string
 	ExtraMessage string
+	UnqualifiedMessage string
 	NoTLS bool
 	Addons []addon.Addon
 }
